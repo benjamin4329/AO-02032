@@ -1,0 +1,15 @@
+﻿<AML>
+ <Item type="CommandBarButton" id="B7A341EE943F4FCB80841D981B6EFC13" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <image>../Images/Image.svg</image>
+  <image_additional>../Images/Image.svg</image_additional>
+  <label xml:lang="en"> View File</label>
+  <i18n:label xml:lang="zc">预览文件</i18n:label>
+  <i18n:label xml:lang="zt">預覧檔案</i18n:label>
+  <on_click_handler keyed_name="bcs_SViewFile_BtnClick" type="Method">C1D2E0D1BCC04BC78613A4B154049CE9</on_click_handler>
+  <on_init_handler keyed_name="bcs_SViewFile_Init" type="Method">84DED429E5C441CA88BB70C41D1DA18D</on_init_handler>
+  <tooltip_template xml:lang="en"> View File</tooltip_template>
+  <i18n:tooltip_template xml:lang="zc">预览文件</i18n:tooltip_template>
+  <i18n:tooltip_template xml:lang="zt">預覧檔案</i18n:tooltip_template>
+  <name>BCS SView File</name>
+ </Item>
+</AML>

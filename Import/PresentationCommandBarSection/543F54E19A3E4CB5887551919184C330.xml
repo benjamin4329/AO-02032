@@ -1,0 +1,23 @@
+﻿<AML>
+ <Item type="PresentationCommandBarSection" id="543F54E19A3E4CB5887551919184C330" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <related_id keyed_name="BCS SView Sidebar" type="CommandBarSection">
+   <Item type="CommandBarSection" id="11465BF5F24D4F43909068CF7A92C0DB" action="add">
+    <classification>Data Model</classification>
+    <location keyed_name="ItemWindowSidebar" type="cui_Location">BC1CFDCECA434111B7A88A51EE430CC5</location>
+    <name>BCS SView Sidebar</name>
+    <Relationships>
+     <Item type="CommandBarSectionItem" id="2DE4B53041D048E499FC5AFF08663420" action="add">
+      <action>Add</action>
+      <related_id keyed_name="BCS SView File" type="CommandBarItem">B7A341EE943F4FCB80841D981B6EFC13</related_id>
+      <role keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</role>
+      <sort_order>128</sort_order>
+      <source_id keyed_name="BCS SView Sidebar" type="CommandBarSection">11465BF5F24D4F43909068CF7A92C0DB</source_id>
+     </Item>
+    </Relationships>
+   </Item>
+  </related_id>
+  <role keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</role>
+  <sort_order>256</sort_order>
+  <source_id keyed_name="27742230F8244449ABF80F6E4AADA3E5" type="PresentationConfiguration">27742230F8244449ABF80F6E4AADA3E5</source_id>
+ </Item>
+</AML>

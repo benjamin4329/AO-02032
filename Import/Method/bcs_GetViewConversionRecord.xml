@@ -1,0 +1,290 @@
+﻿<AML>
+ <Item type="Method" id="2D25E3AC3F6E4C3097EE34191EAEB8CB" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[//Creator:Kenny
+//Name:bcs_GetViewConversionRecord
+//Type: C#
+//Event: 
+//Comments:
+//============================================================
+
+    Innovator inn = this.getInnovator();
+    
+using(CCO.Permissions.GrantIdentity(Aras.Server.Security.Identity.GetByName("Aras PLM")))
+{
+    try
+    {
+        //System.Diagnostics.Debugger.Break();
+    	string type = this.getProperty("itemtype","");
+    	string id = this.getProperty("itemid","");
+    	Aras.IOM.Item item = inn.getItemById(type,id);
+    	//Modify by kenny 2024/06/21 /Server
+        // string url = HttpContext.Current.Request.Url.LocalPath;
+        // url = System.Text.RegularExpressions.Regex.Split(url, $"/Server/", System.Text.RegularExpressions.RegexOptions.IgnoreCase)[0];
+        var req = CCO.Context.Request;
+        string url = System.Text.RegularExpressions.Regex.Split(req.PathBase, $"/Server", System.Text.RegularExpressions.RegexOptions.IgnoreCase)[0];     
+        
+        //BCS External SVC Configuration
+        Dictionary<string, Aras.IOM.Item> rets = GetServerConfigSetting(item.getAttribute("typeId"), "");
+        Aras.IOM.Item svcs = GetExternalSVCConfig(url, rets.Select(x => x.Key).ToList());
+
+        Aras.IOM.Item scs = rets.Where(x => x.Key == svcs.getProperty("bcs_advance_setting", "")).Select(x => x.Value).FirstOrDefault();
+        
+        string ptName = scs.getPropertyAttribute("bcs_native_file_property", "keyed_name","");
+        if (ptName=="")
+            throw new Exception("服務器配置設置 : 未設原始檔案屬性");   
+            //  throw new Exception($"{bcsActionPack.InnovatorExtension.GetUserMessage(inn, "bcsBulkChange_BOM_NotFound", "服務器配置設置 : 未設原始檔案屬性")}");            
+        string fileId = item.getProperty(ptName,"");
+        if (fileId=="")
+            throw new Exception("服務器配置設置 : 物件未上傳原始檔案"); 
+            //  throw new Exception($"{bcsActionPack.InnovatorExtension.GetUserMessage(inn, "bcs_SView_NotUploadNativeFile", "服務器配置設置 : 物件未上傳原始檔案")}"); 
+                                       
+        //支持的模型格式
+        string modelFormats = $",{scs.getProperty("bcs_supported_model_formats","")},".Trim().ToLower();
+        string fileName = item.getPropertyAttribute(ptName, "keyed_name") ;
+        
+        string extension = Path.GetExtension(fileName).ToLower();
+        extension = (extension.Length<1)? extension : extension.Substring(1);
+        if (modelFormats.IndexOf($",{extension},")<0 )
+            throw new Exception($"圖檔不支援的檔案格式({fileName})"); 
+            
+        Aras.IOM.Item ret = GetViewConversionRecord(item, scs);
+
+    	return ret;        
+        
+    
+    }
+    catch (Exception ex)
+    {
+        Aras.IOM.Item ret = inn.newError(ex.Message);
+        return ret;
+    }
+}
+}
+
+
+
+
+/// <summary>
+/// 獲取查看轉化記錄
+/// </summary>
+/// <param name="sourceItem"></param>
+/// <param name="scs"></param>
+/// <returns></returns>
+private Aras.IOM.Item GetViewConversionRecord(Aras.IOM.Item sourceItem, Aras.IOM.Item scs)
+{
+    try
+    {
+        string ptName = scs.getPropertyAttribute("bcs_native_file_property", "keyed_name","");
+        Aras.IOM.Item vcr = this.getInnovator().newItem("BCS View Conversion Record", "get");
+        vcr.setProperty("bcs_file", sourceItem.getProperty(ptName, ""));
+        vcr.setProperty("bcs_source_type", sourceItem.getType());
+        vcr.setProperty("bcs_source_id", sourceItem.getID());
+        vcr.setProperty("bcs_pt_name", ptName);
+        vcr.setProperty("bcs_converter", "SView");
+        Aras.IOM.Item ret = vcr.apply();
+        if (ret.getItemCount() < 1)
+        {
+            //新增
+            vcr = this.getInnovator().newItem("BCS View Conversion Record", "add");
+            vcr.setProperty("bcs_file", sourceItem.getProperty(ptName, ""));
+            vcr.setProperty("bcs_source_type", sourceItem.getType());
+            vcr.setProperty("bcs_source_id", sourceItem.getID());
+            vcr.setProperty("bcs_source_keyed_name", sourceItem.getProperty("keyed_name",""));
+            vcr.setProperty("bcs_pt_name", ptName);
+            vcr.setProperty("bcs_status", "1");
+            vcr.setProperty("bcs_message", "");
+            vcr.setProperty("bcs_converter", "SView");
+            SetSaveInfo(scs,vcr);
+            vcr.setProperty("bcs_server_config", scs.getID());
+            vcr = vcr.apply();
+            if (vcr.isError()) throw new Exception(vcr.getErrorString());
+        }
+        else
+        {
+            //bcs_status = 已完成 : 2
+            vcr = ret.getItemByIndex(0);
+            string converter = ret.getProperty("bcs_converter", "");
+            string fileId =  ret.getProperty("bcs_convert_file", "");
+            string status = ret.getProperty("bcs_status", "");
+            string ptViewable = scs.getPropertyAttribute("bcs_viewable_file_property", "keyed_name", "");
+            
+            if (string.IsNullOrWhiteSpace(ptViewable) ==false && status =="2" && converter== "SView" && fileId != "" && fileId==sourceItem.getProperty(ptName, ""))
+            {
+                if (IsCanLockItem(sourceItem))
+                {
+                    if (scs.getPropertyAttribute("bcs_viewable_file_property", "keyed_name", "")!=""){
+                        sourceItem.setAttribute("version", "0");
+                        sourceItem.setAttribute("serverEvents", "0");
+                        sourceItem.setProperty(scs.getPropertyAttribute("bcs_viewable_file_property", "keyed_name", ""), fileId);
+                        //bcs_thumbnail_file_property
+                        sourceItem = sourceItem.apply("edit");
+                        if (sourceItem.isError()) throw new Exception(sourceItem.getErrorString());                      
+                    }
+                }
+            }
+            else
+            {
+                //bcs_status = 轉換中 : 1 及 已完成 : 2
+                if (status!="" && status != "1" && status != "2")
+                {
+                    //重新轉
+                    vcr.setAttribute("version", "0");
+                    vcr.setAttribute("serverEvents", "0");
+                    vcr.setProperty("bcs_source_keyed_name", sourceItem.getProperty("keyed_name", ""));
+                    vcr.setProperty("bcs_status", "1");
+                    vcr.setProperty("bcs_message", "");
+                    vcr.setProperty("bcs_converter", "SView");
+                    vcr.setProperty("bcs_pt_name", ptName);
+                    SetSaveInfo(scs,vcr);
+                    vcr.setProperty("bcs_server_config", scs.getID());
+                    vcr = vcr.apply("edit");
+                    if (vcr.isError()) throw new Exception(vcr.getErrorString());
+                }
+            }
+        }
+        return vcr;
+
+    }
+    catch (Exception ex)
+    {
+        throw ex;
+    }
+}
+
+/// <summary>
+/// 設置保存信息
+/// </summary>
+/// <param name="scs"></param>
+/// <param name="vcr"></param>
+private void SetSaveInfo(Aras.IOM.Item scs, Aras.IOM.Item vcr)
+{
+    try
+    {
+        StringBuilder sb = new StringBuilder();
+        Newtonsoft.Json.JsonWriter jw = new Newtonsoft.Json.JsonTextWriter(new StringWriter(sb));
+        jw.Formatting = Newtonsoft.Json.Formatting.Indented;
+        jw.WriteStartObject();
+        jw.WritePropertyName("bcs_viewable_file_property");
+        jw.WriteValue(scs.getPropertyAttribute("bcs_viewable_file_property", "keyed_name", ""));
+        jw.WritePropertyName("bcs_thumbnail_file_property");
+        jw.WriteValue(scs.getPropertyAttribute("bcs_thumbnail_file_property", "keyed_name", ""));
+    
+        jw.WriteEndObject();
+        vcr.setProperty("bcs_saved_info", sb.ToString());
+    }
+    catch {
+    }
+}
+
+
+/// <summary>
+/// 是否能鎖定物件
+/// </summary>
+/// <param name="item"></param>
+/// <returns></returns>
+protected internal bool IsCanLockItem(Aras.IOM.Item item)
+{
+    try
+    {
+        if (item.getProperty("is_current", "") != "1") return false;
+
+        if (item.getLockStatus() == 1)
+            return (item.getProperty("locked_by_id", "") == this.getInnovator().getUserID()) ? true : false;
+
+        item.lockItem();
+        if (item.getLockStatus() == 0) return false;
+
+        item.unlockItem();
+        return true;
+
+    }
+    catch (Exception ex)
+    {
+        throw ex;
+    }
+}
+        
+
+
+/// <summary>
+/// 獲取外部服務配置
+/// </summary>
+/// <param name="url"></param>
+/// <param name="ids"></param>
+/// <returns></returns>
+private Aras.IOM.Item GetExternalSVCConfig(string url, List<string> ids)
+{
+    try
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("select a.id,a.bcs_ap_server,a.bcs_advance_setting from [innovator].[BCS_EXTERNAL_SVC_CONFIGURATION] as a ");
+        sb.Append("left join [innovator].[BCS_MULTI_AP_CONNECTION] as b on a.bcs_ap_server = b.id ");
+        sb.Append($"where a.classification = 'SView' and a.bcs_advance_setting in ('{string.Join("','",ids)}') and b.bcs_raw_url ='{url}' and a.bcs_advance_setting!='' and not a.bcs_advance_setting is null ");
+        string sql = sb.ToString();
+
+        Aras.IOM.Item svc = this.getInnovator().applySQL(sql);
+        if (svc.isError())
+            throw new Exception(svc.getErrorString());
+        
+        if (svc.getItemCount()<1)
+            throw new Exception("無法取得外部服務配置"); 
+            // throw new Exception($"{bcsActionPack.InnovatorExtension.GetUserMessage(this.getInnovator(), "bcs_SView_UnableGetExternalConfiguration", "無法取得外部服務配置")}"); 
+
+        return svc.getItemByIndex(0);
+
+    }
+    catch (Exception ex)
+    {
+        throw ex;
+    }
+}
+
+
+/// <summary>
+/// 服務器配置設置
+/// </summary>
+/// <param name="itemTypeId"></param>
+/// <param name="relationshipTypeId"></param>
+/// <returns></returns>
+private Dictionary<string, Aras.IOM.Item> GetServerConfigSetting(string itemTypeId, string relationshipTypeId)
+{
+    try
+    {
+        Dictionary<string, Aras.IOM.Item> rets = new Dictionary<string, Aras.IOM.Item> ();
+        Aras.IOM.Item scs = this.getInnovator().newItem("BCS Server Config Setting", "get");
+        //scs.setProperty("id", $"'{string.Join("','", ids)}'");
+        //scs.setPropertyCondition("id", "in");
+        scs.setProperty("classification", "SView");
+        scs.setProperty("bcs_itemtype", itemTypeId);
+        if (string.IsNullOrWhiteSpace(relationshipTypeId) ==false)
+            scs.setProperty("bcs_relationship_type", relationshipTypeId);
+
+        Aras.IOM.Item ret = scs.apply();
+
+        if (ret.isError())
+            throw new Exception(ret.getErrorString());
+
+        if (ret.getItemCount() < 1)
+            throw new Exception("無法取得服務器配置設置");
+            // throw new Exception($"{bcsActionPack.InnovatorExtension.GetUserMessage(this.getInnovator(), "bcs_SView_UnableGetServerConfiguration", "無法取得服務器配置設置")}");
+
+        for (int i=0;i< ret.getItemCount(); i++)
+        {
+            rets.Add(ret.getItemByIndex(i).getID(), ret.getItemByIndex(i));
+        }
+        return rets;
+
+    }
+    catch (Exception ex)
+    {
+        throw ex;
+    }
+
+        
+
+]]></method_code>
+  <method_type>C#</method_type>
+  <name>bcs_GetViewConversionRecord</name>
+ </Item>
+</AML>

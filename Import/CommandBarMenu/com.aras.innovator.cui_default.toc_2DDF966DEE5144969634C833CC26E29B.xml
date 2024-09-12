@@ -1,0 +1,9 @@
+﻿<AML>
+ <Item type="CommandBarMenu" id="2DDF966DEE5144969634C833CC26E29B" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <label xml:lang="en">Viewer Configuration</label>
+  <i18n:label xml:lang="zc">线上预览配置</i18n:label>
+  <i18n:label xml:lang="zt">線上預覽配置</i18n:label>
+  <parent_menu keyed_name="com.aras.innovator.cui_default.toc_31A902C3706C4E4DB862E16823367A8E" type="CommandBarMenu">31A902C3706C4E4DB862E16823367A8E</parent_menu>
+  <name>com.aras.innovator.cui_default.toc_2DDF966DEE5144969634C833CC26E29B</name>
+ </Item>
+</AML>

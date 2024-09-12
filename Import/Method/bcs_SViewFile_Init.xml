@@ -1,0 +1,48 @@
+﻿<AML>
+ <Item type="Method" id="84DED429E5C441CA88BB70C41D1DA18D" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[//Creator:Kenny
+//Name:bcs_SViewFile_Init
+//Type:JavaScript
+//Event: Sidebar Button Event : on_init_handler
+//Comments:
+//============================================================
+//alert("bcs_SViewFile_Init");
+//debugger;
+//BCS SView Sidebar->BCS SView File
+
+var tabViewContol = window.getViewersTabs();
+
+var viewFile = dojo.declare('Aras.Innovator.Solutions.Broadway.SView', [dijit._WidgetBase, dijit._TemplatedMixin], {
+    templateString: '<iframe id="viewFile" src="../../Broadway/SView/ViewFile.html"  frameborder="0" scrolling="auto"' +
+        ' style="width: 100%; height: 100%;"></iframe>'
+});
+
+var tabViewContol = window.getViewersTabs();
+tabViewContol.createTab(viewFile(), 'BCS SView File');
+
+tabViewContol.onSelectTab = function(sender, eventArguments) {
+    //alert(eventArguments.id);
+    var wmFrame=document.getElementById(eventArguments.id).children[0];
+    if (wmFrame.accessKey == eventArguments.id) return ;
+    switch(eventArguments.id)
+    {
+        case "BCS SView File":
+            var strPath = "../../Broadway/AO-02032/ViewFile.html";
+            wmFrame.src= strPath;
+            if (window.isEditMode==false) return ;
+            break;
+        default ://formTab
+            //wmFrame.contentWindow.onSelectTab(eventArguments);
+            wmFrame = document.getElementById("BCS SView File").children[0];
+            if (wmFrame==null) return ;
+            break;       
+    }
+    wmFrame.accessKey = eventArguments.id;
+}
+
+]]></method_code>
+  <method_type>JavaScript</method_type>
+  <name>bcs_SViewFile_Init</name>
+ </Item>
+</AML>

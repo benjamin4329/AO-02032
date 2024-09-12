@@ -1,0 +1,9 @@
+﻿<AML>
+ <Item type="UserMessage" id="ABF05A1AB5214E37AE2966DB435BA7D4" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <custom>0</custom>
+  <text xml:lang="en">Server Configuration Setting : File property not set</text>
+  <i18n:text xml:lang="zc">服务器配置设置 : 未设原始档案属性</i18n:text>
+  <i18n:text xml:lang="zt">服務器配置設置 : 未設原始檔案屬性</i18n:text>
+  <name>bcs_SView_Config_FilePropertyNotSet</name>
+ </Item>
+</AML>

@@ -1,0 +1,19 @@
+﻿<AML>
+ <Item type="List" id="0A1DC898B45847248E308867721C0A67" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <description>SView 轉換器定義 (其他非標準規格)
+Label : 轉換器名稱
+value : 轉換附檔名</description>
+  <name>BCS SView Converter</name>
+  <Relationships>
+   <Item type="Value" id="91E4F964141741F79C1D53450DB49E56" action="add">
+    <inactive>0</inactive>
+    <label xml:lang="en">AssimpConverter</label>
+    <i18n:label xml:lang="zc" xmlns:i18n="http://www.aras.com/I18N">AssimpConverter</i18n:label>
+    <i18n:label xml:lang="zt" xmlns:i18n="http://www.aras.com/I18N">AssimpConverter</i18n:label>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="BCS SView Converter" type="List">0A1DC898B45847248E308867721C0A67</source_id>
+    <value>stl</value>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

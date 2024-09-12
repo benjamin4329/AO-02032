@@ -1,0 +1,9 @@
+﻿<AML>
+ <Item type="UserMessage" id="179B30366B4D41A2A1122F9DEF54EFD0" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <custom>0</custom>
+  <text xml:lang="en">Unable to get external service configuration</text>
+  <i18n:text xml:lang="zc">无法取得外部服务配置</i18n:text>
+  <i18n:text xml:lang="zt">無法取得外部服務配置</i18n:text>
+  <name>bcs_SView_UnableGetExternalConfiguration</name>
+ </Item>
+</AML>

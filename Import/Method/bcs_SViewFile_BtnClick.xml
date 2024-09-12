@@ -1,0 +1,38 @@
+﻿<AML>
+ <Item type="Method" id="C1D2E0D1BCC04BC78613A4B154049CE9" action="add" xmlns:i18n="http://www.aras.com/I18N">
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[//Creator:Kenny
+//Name:bcs_SViewFile_BtnClick
+//Type:JavaScript
+//Event: Sidebar Button Event : on_click_handler
+//Comments:
+//============================================================
+//alert("bcs_SViewFile_BtnClick");
+//debugger;
+//BCS SView Sidebar->BCS SView File
+
+// switch(inArgs.control.id)
+// {
+//     case "show_form":
+//         inArgs.switchToTabId = 'formTab';
+//         inArgs.enabledButtonImage = '../images/ShowFormOn.svg';
+//         dijit.byId('sidebar').switchSidebarButton('BCS SView File', '../images/ImageViewerOff.svg', false);
+//         break;
+//     case "BCS SView File":
+//         inArgs.switchToTabId = 'SViewFile';
+//         break;
+// }
+
+// aras.evalMethod('cui_ShowTab_ButtonClick', '', inArgs);
+
+let tabViewContol = window.getViewersTabs();
+tabViewContol.selectTab("BCS SView File");
+
+let sidebar = dijit.byId('sidebar');
+sidebar.switchSidebarButton('bcs_CADShowForm', '../images/ShowFormOff.svg', false);
+sidebar.switchSidebarButton('BCS SView File', '../images/ShowFormOn.svg', true);
+]]></method_code>
+  <method_type>JavaScript</method_type>
+  <name>bcs_SViewFile_BtnClick</name>
+ </Item>
+</AML>
